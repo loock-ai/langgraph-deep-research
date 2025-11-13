@@ -34,50 +34,50 @@ graph TB
 
     subgraph app["LangGraph Deep Research - Next.js 15 全栈应用"]
         subgraph frontend["前端层 - React 19"]
-            ChatUI[聊天界面<br/>app/page.tsx<br/>流式响应显示]
-            DeepResearchUI[深度研究界面<br/>app/deepresearch/page.tsx<br/>SSE进度跟踪]
-            SessionSidebar[会话侧边栏<br/>app/components/SessionSidebar.tsx<br/>历史会话管理]
-            FileTree[文件树组件<br/>app/deepresearch/components/FileTree.tsx<br/>研究成果展示]
+            ChatUI[聊天界面<br/>app page.tsx<br/>流式响应显示]
+            DeepResearchUI[深度研究界面<br/>app deepresearch page.tsx<br/>SSE进度跟踪]
+            SessionSidebar[会话侧边栏<br/>app components SessionSidebar.tsx<br/>历史会话管理]
+            FileTree[文件树组件<br/>app deepresearch FileTree.tsx<br/>研究成果展示]
         end
 
         subgraph api["API路由层 - Next.js API Routes"]
-            ChatAPI[聊天API<br/>POST api/chat<br/>流式响应]
-            SessionAPI[会话API<br/>api/chat/sessions<br/>CRUD操作]
-            ResearchStartAPI[研究启动API<br/>POST api/deepresearch/start<br/>创建研究会话]
-            ResearchStreamAPI[研究流式API<br/>GET api/deepresearch/stream/sessionId<br/>SSE推送]
-            ResearchStatusAPI[研究状态API<br/>GET api/deepresearch/status/sessionId<br/>状态查询]
-            FileAPI[文件访问API<br/>GET api/deepresearch/files/sessionId/path<br/>文件读取]
+            ChatAPI[聊天API<br/>POST api chat<br/>流式响应]
+            SessionAPI[会话API<br/>api chat sessions<br/>CRUD操作]
+            ResearchStartAPI[研究启动API<br/>POST api deepresearch start<br/>创建研究会话]
+            ResearchStreamAPI[研究流式API<br/>GET api deepresearch stream<br/>SSE推送]
+            ResearchStatusAPI[研究状态API<br/>GET api deepresearch status<br/>状态查询]
+            FileAPI[文件访问API<br/>GET api deepresearch files<br/>文件读取]
         end
 
         subgraph logic["业务逻辑层 - LangGraph Agent"]
-            ChatbotGraph[聊天机器人图<br/>app/agent/chatbot.ts<br/>START→chatbot→END]
-            DeepResearchGraph[深度研究图<br/>app/agent/deepresearch/graph.ts<br/>多节点状态机]
+            ChatbotGraph[聊天机器人图<br/>app agent chatbot.ts<br/>START chatbot END]
+            DeepResearchGraph[深度研究图<br/>app agent deepresearch<br/>多节点状态机]
 
             subgraph deepnodes["DeepResearch 节点"]
-                AnalyzeNode[问题分析节点<br/>analyzeQuestionNode<br/>提取关键词/研究方向]
+                AnalyzeNode[问题分析节点<br/>analyzeQuestionNode<br/>提取关键词研究方向]
                 PlanNode[计划生成节点<br/>generatePlanNode<br/>创建研究大纲]
-                ResearchNode[章节研究节点<br/>researchSectionNode<br/>搜索/分析/生成]
-                ReportNode[报告生成节点<br/>generateReportNode<br/>汇总Markdown/HTML]
+                ResearchNode[章节研究节点<br/>researchSectionNode<br/>搜索分析生成]
+                ReportNode[报告生成节点<br/>generateReportNode<br/>汇总Markdown HTML]
             end
         end
 
         subgraph data["数据访问层"]
-            ChatDB[聊天数据库<br/>app/agent/db.ts<br/>sessions表]
-            ResearchDB[研究数据库<br/>app/api/deepresearch/db.ts<br/>research_sessions/generated_files表]
+            ChatDB[聊天数据库<br/>app agent db.ts<br/>sessions表]
+            ResearchDB[研究数据库<br/>app api deepresearch db.ts<br/>research sessions表]
             Checkpointer[检查点存储<br/>SqliteSaver<br/>LangGraph状态持久化]
-            FileManager[文件管理器<br/>app/api/deepresearch/fileManager.ts<br/>public/目录管理]
+            FileManager[文件管理器<br/>app api fileManager.ts<br/>public目录管理]
         end
     end
 
     subgraph external["外部服务"]
-        OpenAI[OpenAI API<br/>gpt-3.5-turbo/gpt-4<br/>LLM推理]
-        Tavily[Tavily Search<br/>网络搜索服务<br/>maxResults=3-5]
+        OpenAI[OpenAI API<br/>gpt-3.5-turbo gpt-4<br/>LLM推理]
+        Tavily[Tavily Search<br/>网络搜索服务<br/>maxResults 3-5]
     end
 
     subgraph mcp["MCP工具服务器"]
-        MCPThinking[Sequential Thinking<br/>@modelcontextprotocol/server-sequential-thinking<br/>深度思考工具]
-        MCPFilesystem[Filesystem<br/>@modelcontextprotocol/server-filesystem<br/>文件读写]
-        MCPPlaywright[Playwright<br/>@playwright/mcp<br/>浏览器自动化]
+        MCPThinking[Sequential Thinking<br/>server-sequential-thinking<br/>深度思考工具]
+        MCPFilesystem[Filesystem<br/>server-filesystem<br/>文件读写]
+        MCPPlaywright[Playwright<br/>playwright mcp<br/>浏览器自动化]
     end
 
     Browser --> ChatUI
@@ -248,7 +248,7 @@ graph TB
 
         subgraph storage["本地存储"]
             SQLite[(SQLite DB<br/>chat_history.db<br/>单文件数据库)]
-            PublicFiles[(/public<br/>研究成果文件夹)]
+            PublicFiles[(public目录<br/>研究成果文件夹)]
         end
 
         subgraph process["Node.js 进程"]
@@ -296,13 +296,13 @@ graph TB
         EdgeNetwork[Edge Network<br/>全球CDN]
 
         subgraph serverless["Serverless Functions"]
-            ChatFunc[/api/chat<br/>流式响应函数]
-            ResearchFunc[/api/deepresearch/*<br/>研究API函数]
+            ChatFunc[api chat<br/>流式响应函数]
+            ResearchFunc[api deepresearch<br/>研究API函数]
         end
 
         subgraph storage_prod["存储层"]
             VercelBlob[(Vercel Blob<br/>文件存储<br/>需迁移)]
-            ExternalDB[(外部数据库<br/>PostgreSQL/Supabase<br/>需迁移)]
+            ExternalDB[(外部数据库<br/>PostgreSQL Supabase<br/>需迁移)]
         end
     end
 
