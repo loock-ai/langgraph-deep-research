@@ -387,27 +387,41 @@ export default function DeepResearchPage() {
   }, []);
 
   return (
-    <div className='h-screen flex flex-col bg-gray-50'>
-      {/* 顶部标题栏 */}
-      <header className='bg-white border-b border-gray-200 px-6 py-4'>
+    <div className='h-screen flex flex-col bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50'>
+      {/* 顶部标题栏 - 优化版 */}
+      <header className='bg-white/80 backdrop-blur-xl border-b border-gray-200/50 px-8 py-5 shadow-sm'>
         <div className='flex items-center justify-between'>
-          <h1 className='text-2xl font-bold text-gray-900'>DeepResearch</h1>
+          <div className='flex items-center gap-4'>
+            <div className='w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg'>
+              <svg className='w-7 h-7 text-white' fill='none' stroke='currentColor' strokeWidth='2' viewBox='0 0 24 24'>
+                <path strokeLinecap='round' strokeLinejoin='round' d='M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z' />
+              </svg>
+            </div>
+            <div>
+              <h1 className='text-2xl font-bold text-gray-900'>Deep Research</h1>
+              <p className='text-sm text-gray-500'>AI 驱动的深度研究平台</p>
+            </div>
+          </div>
+
           <div className='flex items-center space-x-4'>
-            {/* 历史按钮 */}
+            {/* 历史按钮 - 优化版 */}
             <button
               onClick={() => setShowHistoryPanel(true)}
-              className='flex items-center space-x-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors'
+              className='flex items-center space-x-2 px-4 py-2.5 text-sm text-gray-700 hover:text-gray-900 bg-white hover:bg-gray-50 border border-gray-200 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md'
               title='查看历史记录'
             >
               <Clock className='w-4 h-4' />
-              <span>历史</span>
+              <span className='font-medium'>历史记录</span>
             </button>
 
             {researchState.sessionId && (
-              <span className='text-sm text-gray-500'>
-                会话: {researchState.sessionId.slice(0, 8)}...
-              </span>
+              <div className='px-4 py-2 bg-blue-50 border border-blue-200 rounded-xl'>
+                <span className='text-sm text-blue-700 font-medium'>
+                  会话: {researchState.sessionId.slice(0, 8)}...
+                </span>
+              </div>
             )}
+
             <ProgressIndicator
               status={researchState.status}
               progress={researchState.progress}
@@ -418,10 +432,10 @@ export default function DeepResearchPage() {
         </div>
       </header>
 
-      {/* 主要内容区域 */}
-      <div className='flex-1 flex overflow-hidden'>
+      {/* 主要内容区域 - 优化版 */}
+      <div className='flex-1 flex overflow-hidden gap-4 p-4'>
         {/* 左侧对话面板 */}
-        <div className='w-2/5 border-r border-gray-200 flex flex-col'>
+        <div className='w-2/5 bg-white rounded-2xl shadow-lg border border-gray-200/50 flex flex-col overflow-hidden'>
           <ChatPanel
             messages={messages}
             researchState={researchState}
@@ -432,13 +446,18 @@ export default function DeepResearchPage() {
 
         {/* 右侧预览面板 */}
         <div className='flex-1 flex flex-col'>
-          <div className='flex h-full'>
+          <div className='flex h-full gap-4'>
             {/* 文件树 */}
-            <div className='w-64 border-r border-gray-200 bg-white'>
-              <div className='p-4 border-b border-gray-200'>
-                <h3 className='text-sm font-medium text-gray-900'>文件</h3>
+            <div className='w-72 bg-white rounded-2xl shadow-lg border border-gray-200/50 flex flex-col overflow-hidden'>
+              <div className='p-5 border-b border-gray-100 bg-gradient-to-r from-purple-50 to-blue-50'>
+                <h3 className='text-base font-bold text-gray-900 flex items-center gap-2'>
+                  <svg className='w-5 h-5 text-purple-600' fill='none' stroke='currentColor' strokeWidth='2' viewBox='0 0 24 24'>
+                    <path strokeLinecap='round' strokeLinejoin='round' d='M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z' />
+                  </svg>
+                  研究文件
+                </h3>
               </div>
-              <div className='overflow-auto'>
+              <div className='flex-1 overflow-auto'>
                 {researchState.fileTree ? (
                   <FileTree
                     tree={researchState.fileTree}
@@ -446,13 +465,21 @@ export default function DeepResearchPage() {
                     onFileSelect={handleFileSelect}
                   />
                 ) : (
-                  <div className='p-4 text-sm text-gray-500'>暂无文件</div>
+                  <div className='p-6 text-center'>
+                    <div className='w-16 h-16 mx-auto mb-3 rounded-full bg-gray-100 flex items-center justify-center'>
+                      <svg className='w-8 h-8 text-gray-400' fill='none' stroke='currentColor' strokeWidth='2' viewBox='0 0 24 24'>
+                        <path strokeLinecap='round' strokeLinejoin='round' d='M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' />
+                      </svg>
+                    </div>
+                    <p className='text-sm text-gray-500 font-medium'>暂无文件</p>
+                    <p className='text-xs text-gray-400 mt-1'>启动研究后会自动生成</p>
+                  </div>
                 )}
               </div>
             </div>
 
             {/* 内容查看器 */}
-            <div className='flex-1'>
+            <div className='flex-1 bg-white rounded-2xl shadow-lg border border-gray-200/50 overflow-hidden'>
               <ContentViewer
                 selectedFile={selectedFile}
                 content={fileContent}

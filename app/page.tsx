@@ -289,23 +289,23 @@ export default function ChatPage() {
         {/* 主内容区 */}
         <div className="flex-1 flex flex-col">
           {/* 聊天区域 */}
-          <div className="flex-1 max-w-4xl mx-auto w-full flex flex-col p-4 min-h-0">
+          <div className="flex-1 max-w-5xl mx-auto w-full flex flex-col p-6 min-h-0">
             {/* 消息列表 */}
-            <div className="flex-1 backdrop-blur-md bg-white/5 rounded-3xl border border-white/20 shadow-2xl overflow-hidden mb-4 min-h-0">
-              <div className="h-full overflow-y-auto p-6 space-y-4 custom-scrollbar">
+            <div className="flex-1 backdrop-blur-xl bg-gradient-to-br from-white/5 to-white/10 rounded-3xl border border-white/10 shadow-2xl overflow-hidden mb-6 min-h-0">
+              <div className="h-full overflow-y-auto p-8 space-y-6 custom-scrollbar">
                 {messages.map((message, index) => (
                   <div
                     key={message.id}
                     className={`flex gap-4 opacity-0 ${message.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}
                     style={{
-                      animation: `fadeIn 0.5s ease-out ${index * 0.1}s forwards`
+                      animation: `fadeIn 0.4s ease-out ${index * 0.08}s forwards`
                     }}
                   >
                     {/* 头像 */}
                     <div className="flex-shrink-0">
-                      <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shadow-lg ${message.role === 'user'
-                        ? 'bg-gradient-to-br from-blue-500 to-cyan-500'
-                        : 'bg-gradient-to-br from-purple-500 to-pink-500'
+                      <div className={`w-11 h-11 rounded-2xl flex items-center justify-center shadow-xl transform transition-transform hover:scale-105 ${message.role === 'user'
+                        ? 'bg-gradient-to-br from-blue-500 via-blue-600 to-cyan-500'
+                        : 'bg-gradient-to-br from-purple-500 via-purple-600 to-pink-500'
                         }`}>
                         {message.role === 'user' ? (
                           <User className="h-5 w-5 text-white" />
@@ -316,46 +316,46 @@ export default function ChatPage() {
                     </div>
 
                     {/* 消息内容 */}
-                    <div className={`max-w-[75%] ${message.role === 'user' ? 'text-right' : 'text-left'}`}>
-                      <div className={`relative inline-block p-4 rounded-2xl shadow-lg backdrop-blur-sm border ${message.role === 'user'
-                        ? 'bg-gradient-to-br from-blue-500/90 to-cyan-500/90 text-white border-white/20 rounded-br-md'
-                        : 'bg-white/10 text-white border-white/20 rounded-bl-md'
+                    <div className={`max-w-[80%] ${message.role === 'user' ? 'text-right' : 'text-left'}`}>
+                      <div className={`relative inline-block p-4 rounded-2xl shadow-xl backdrop-blur-md border transition-all duration-200 hover:shadow-2xl ${message.role === 'user'
+                        ? 'bg-gradient-to-br from-blue-500 via-blue-600 to-cyan-500 text-white border-blue-400/30 rounded-br-md'
+                        : 'bg-gradient-to-br from-white/15 to-white/5 text-white border-white/20 rounded-bl-md hover:border-purple-400/30'
                         }`}>
-                        <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
+                        <p className="text-[15px] leading-relaxed whitespace-pre-wrap">{message.content}</p>
 
                         {/* 流式打字光标 */}
                         {message.isStreaming && (
-                          <span className="inline-block w-2 h-5 bg-white ml-1 typing-cursor"></span>
+                          <span className="inline-block w-2 h-5 bg-white/80 ml-1 typing-cursor animate-pulse"></span>
                         )}
                       </div>
 
-                      <div className={`mt-2 text-xs text-purple-200 ${message.role === 'user' ? 'text-right' : 'text-left'}`}>
-                        {message.timestamp.toLocaleTimeString('zh-CN', {
+                      <div className={`mt-2 text-xs text-purple-200/60 flex items-center gap-1 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                        <span>{message.timestamp.toLocaleTimeString('zh-CN', {
                           hour: '2-digit',
                           minute: '2-digit'
-                        })}
+                        })}</span>
                       </div>
                     </div>
                   </div>
                 ))}
 
-                {/* 加载动画 */}
+                {/* 加载动画 - 优化版 */}
                 {isLoading && (
-                  <div className="flex gap-4 opacity-0" style={{ animation: 'fadeIn 0.5s ease-out forwards' }}>
+                  <div className="flex gap-4 opacity-0" style={{ animation: 'fadeIn 0.3s ease-out forwards' }}>
                     <div className="flex-shrink-0">
-                      <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg">
+                      <div className="w-11 h-11 bg-gradient-to-br from-purple-500 via-purple-600 to-pink-500 rounded-2xl flex items-center justify-center shadow-xl animate-pulse">
                         <Bot className="h-5 w-5 text-white" />
                       </div>
                     </div>
 
-                    <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl rounded-bl-md p-4 shadow-lg">
-                      <div className="flex items-center gap-2">
-                        <div className="flex space-x-1">
-                          <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce"></div>
-                          <div className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                          <div className="w-2 h-2 bg-pink-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                    <div className="bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-md border border-white/20 rounded-2xl rounded-bl-md p-5 shadow-xl">
+                      <div className="flex items-center gap-3">
+                        <div className="flex space-x-1.5">
+                          <div className="w-2.5 h-2.5 bg-gradient-to-r from-purple-400 to-purple-500 rounded-full animate-bounce shadow-lg"></div>
+                          <div className="w-2.5 h-2.5 bg-gradient-to-r from-cyan-400 to-cyan-500 rounded-full animate-bounce shadow-lg" style={{ animationDelay: '0.15s' }}></div>
+                          <div className="w-2.5 h-2.5 bg-gradient-to-r from-pink-400 to-pink-500 rounded-full animate-bounce shadow-lg" style={{ animationDelay: '0.3s' }}></div>
                         </div>
-                        <span className="text-purple-200 text-xs ml-2">AI 正在思考...</span>
+                        <span className="text-purple-100 text-sm font-medium">AI 正在思考...</span>
                       </div>
                     </div>
                   </div>
@@ -365,17 +365,17 @@ export default function ChatPage() {
               </div>
             </div>
 
-            {/* 输入区域 */}
-            <div className="backdrop-blur-md bg-white/10 rounded-2xl border border-white/20 shadow-2xl p-4 flex-shrink-0">
-              <div className="flex items-end gap-4">
-                <div className="flex-1 relative input-focus-effect">
+            {/* 输入区域 - 优化版 */}
+            <div className="backdrop-blur-xl bg-gradient-to-br from-white/10 to-white/5 rounded-3xl border border-white/20 shadow-2xl p-5 flex-shrink-0">
+              <div className="flex items-end gap-3">
+                <div className="flex-1 relative">
                   <textarea
                     ref={textareaRef}
                     value={input}
                     onChange={handleInputChange}
                     onKeyPress={handleKeyPress}
                     placeholder="输入你的消息... (支持 Shift+Enter 换行)"
-                    className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-purple-200 resize-none focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent backdrop-blur-sm transition-all duration-200 text-sm input-scrollbar"
+                    className="w-full bg-white/10 border border-white/20 rounded-2xl px-5 py-4 text-white placeholder-purple-200/60 resize-none focus:outline-none focus:ring-2 focus:ring-purple-400/50 focus:border-purple-400/50 backdrop-blur-sm transition-all duration-300 text-[15px] leading-relaxed input-scrollbar hover:bg-white/[0.12] hover:border-purple-400/30"
                     rows={1}
                     disabled={isLoading}
                     style={{ maxHeight: '120px' }}
@@ -385,20 +385,20 @@ export default function ChatPage() {
                 <button
                   onClick={sendMessage}
                   disabled={!input.trim() || isLoading}
-                  className="group p-3 bg-gradient-to-r from-purple-500 to-cyan-500 text-white rounded-xl hover:from-purple-600 hover:to-cyan-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
+                  className="group p-4 bg-gradient-to-r from-purple-500 via-purple-600 to-cyan-500 text-white rounded-2xl hover:from-purple-600 hover:via-purple-700 hover:to-cyan-600 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300 shadow-xl hover:shadow-purple-500/50 transform hover:scale-105 active:scale-95 disabled:transform-none"
                 >
-                  <Send className="h-5 w-5 transition-transform duration-200 group-hover:translate-x-0.5" />
+                  <Send className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                 </button>
               </div>
 
-              <div className="flex items-center justify-between mt-3 text-xs text-purple-200">
+              <div className="flex items-center justify-between mt-4 text-xs text-purple-200/70">
                 <div className="flex items-center gap-2">
-                  <MessageCircle className="h-3 w-3" />
-                  <span>按 Enter 发送，Shift+Enter 换行</span>
+                  <MessageCircle className="h-3.5 w-3.5" />
+                  <span className="font-medium">按 Enter 发送，Shift+Enter 换行</span>
                 </div>
-                <div className="flex items-center gap-1">
-                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                  <span>实时连接</span>
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-green-500/10 rounded-full border border-green-400/20">
+                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse shadow-lg shadow-green-400/50"></div>
+                  <span className="text-green-300 font-medium">实时连接</span>
                 </div>
               </div>
             </div>

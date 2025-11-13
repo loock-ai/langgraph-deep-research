@@ -54,41 +54,45 @@ export function ProgressIndicator({
   };
 
   return (
-    <div className='flex items-center space-x-3'>
-      {/* 状态指示器 */}
+    <div className='flex items-center space-x-4 px-4 py-2.5 bg-white/90 backdrop-blur-sm border border-gray-200 rounded-xl shadow-sm'>
+      {/* 状态指示器 - 优化版 */}
       <div className='flex items-center space-x-2'>
         <div
-          className={`w-3 h-3 rounded-full ${getStatusColor(status)} ${
-            status === 'executing' ? 'animate-pulse' : ''
+          className={`w-3 h-3 rounded-full ${getStatusColor(status)} shadow-lg ${
+            status === 'executing' || status === 'starting' ? 'animate-pulse' : ''
           }`}
         />
-        <span className='text-sm font-medium text-gray-700'>
+        <span className='text-sm font-semibold text-gray-800'>
           {getStatusText(status)}
         </span>
       </div>
 
-      {/* 进度条 */}
+      {/* 进度条 - 优化版 */}
       {progress > 0 && (
-        <div className='flex items-center space-x-2'>
-          <div className='w-32 bg-gray-200 rounded-full h-2'>
+        <div className='flex items-center space-x-3'>
+          <div className='w-40 bg-gray-100 rounded-full h-2.5 shadow-inner overflow-hidden'>
             <div
-              className={`h-2 rounded-full transition-all duration-300 ${getStatusColor(
+              className={`h-2.5 rounded-full transition-all duration-500 ease-out ${getStatusColor(
                 status
-              )}`}
+              )} shadow-sm`}
               style={{ width: `${Math.min(progress, 100)}%` }}
             />
           </div>
-          <span className='text-xs text-gray-500'>{progress.toFixed(1)}%</span>
+          <span className='text-sm font-bold text-gray-700 min-w-[3rem] text-right'>
+            {progress.toFixed(0)}%
+          </span>
         </div>
       )}
 
-      {/* 任务进度 */}
+      {/* 任务进度 - 优化版 */}
       {currentTask !== undefined &&
         totalTasks !== undefined &&
         totalTasks > 0 && (
-          <span className='text-xs text-gray-500'>
-            {currentTask + 1}/{totalTasks}
-          </span>
+          <div className='px-3 py-1 bg-blue-50 border border-blue-200 rounded-lg'>
+            <span className='text-sm font-bold text-blue-700'>
+              {currentTask + 1}/{totalTasks}
+            </span>
+          </div>
         )}
     </div>
   );
