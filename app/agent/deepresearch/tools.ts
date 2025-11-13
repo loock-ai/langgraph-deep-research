@@ -14,31 +14,55 @@ export async function initializeMCPToolsForDeepResearch() {
   const { MultiServerMCPClient } = await import('@langchain/mcp-adapters');
   const { TavilySearch } = await import('@langchain/tavily');
 
-  const mcptools = new MultiServerMCPClient({
-    mcpServers: {
-      'server-sequential-thinking': {
-        command: 'pnpx',
-        args: ['@modelcontextprotocol/server-sequential-thinking', '-y'],
-        transport: 'stdio',
-      },
-      filesystem: {
-        command: 'pnpx',
-        args: [
-          '@modelcontextprotocol/server-filesystem',
-          path.join(process.cwd(), 'public'),
-        ],
-        transport: 'stdio',
-      },
-      playwright: {
-        command: 'npx',
-        args: ['@playwright/mcp@latest'],
-        transport: 'stdio',
-      },
-    },
-  });
+  // 添加超时处理的 MCP 客户端初始化
+  const initializeMCPServers = async () => {
+    try {
+      const mcptools = new MultiServerMCPClient({
+        mcpServers: {
+          'server-sequential-thinking': {
+            command: 'npx',
+            args: ['-y', '@modelcontextprotocol/server-sequential-thinking'],
+            transport: 'stdio',
+          },
+          filesystem: {
+            command: 'npx',
+            args: [
+              '-y',
+              '@modelcontextprotocol/server-filesystem',
+              path.join(process.cwd(), 'public'),
+            ],
+            transport: 'stdio',
+          },
+          // playwright: {
+          //   command: 'npx',
+          //   args: ['@playwright/mcp@latest'],
+          //   transport: 'stdio',
+          // },
+        },
+      });
 
-  // 获取 MCP 工具
-  const tools = await mcptools.getTools();
+      // 设置超时
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('MCP 服务器连接超时')), 15000);
+      });
+
+      // 获取 MCP 工具，带超时处理
+      const tools = await Promise.race([
+        mcptools.getTools(),
+        timeoutPromise
+      ]) as any[];
+
+      return { mcptools, tools };
+    } catch (error) {
+      console.error('MCP 服务器初始化失败:', error);
+
+      // 如果 MCP 服务器失败，尝试只使用搜索工具
+      console.log('回退到仅使用搜索工具');
+      return { mcptools: null, tools: [] };
+    }
+  };
+
+  const { mcptools, tools } = await initializeMCPServers();
 
   // 添加搜索工具
   const searchTool = new TavilySearch({ maxResults: 3 });
@@ -131,8 +155,22 @@ export async function initializeTools(config?: RunnableConfig) {
 
   let mcpTools: unknown[] = [];
   if (Object.keys(mcpServers).length > 0) {
-    const mcpClient = new MultiServerMCPClient({ mcpServers });
-    mcpTools = await mcpClient.getTools();
+    try {
+      const mcpClient = new MultiServerMCPClient({ mcpServers });
+
+      // 设置超时
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('MCP 服务器连接超时')), 10000);
+      });
+
+      mcpTools = await Promise.race([
+        mcpClient.getTools(),
+        timeoutPromise
+      ]) as unknown[];
+    } catch (error) {
+      console.error('MCP 工具初始化失败，继续使用搜索工具:', error);
+      mcpTools = [];
+    }
   }
 
   return {
@@ -176,8 +214,22 @@ export async function initializeMCPTools(toolsConfig: ToolsConfig) {
     return [];
   }
 
-  const mcptools = new MultiServerMCPClient({ mcpServers });
-  return await mcptools.getTools();
+  try {
+    const mcptools = new MultiServerMCPClient({ mcpServers });
+
+    // 设置超时
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('MCP 服务器连接超时')), 10000);
+    });
+
+    return await Promise.race([
+      mcptools.getTools(),
+      timeoutPromise
+    ]);
+  } catch (error) {
+    console.error('MCP 工具初始化失败:', error);
+    return [];
+  }
 }
 
 export function initializeSearchTool(toolsConfig: ToolsConfig) {
@@ -200,17 +252,31 @@ export async function createSearchAgent() {
     includeAnswer: true,
   });
 
-  const mcptools = new MultiServerMCPClient({
-    mcpServers: {
-      'server-sequential-thinking': {
-        command: 'npx',
-        args: ['@modelcontextprotocol/server-sequential-thinking', '-y'],
-        transport: 'stdio',
+  let tools: unknown[] = [];
+  try {
+    const mcptools = new MultiServerMCPClient({
+      mcpServers: {
+        'server-sequential-thinking': {
+          command: 'npx',
+          args: ['-y', '@modelcontextprotocol/server-sequential-thinking'],
+          transport: 'stdio',
+        },
       },
-    },
-  });
+    });
 
-  const tools = await mcptools.getTools();
+    // 设置超时
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('MCP 服务器连接超时')), 10000);
+    });
+
+    tools = await Promise.race([
+      mcptools.getTools(),
+      timeoutPromise
+    ]) as unknown[];
+  } catch (error) {
+    console.error('搜索 Agent MCP 工具初始化失败，仅使用搜索工具:', error);
+    tools = [];
+  }
 
   const searchPrompt = `你是一个专业的信息搜索助手。你的任务是：
 
@@ -239,17 +305,31 @@ export async function createSearchAgent() {
 export async function createAnalysisAgent() {
   const llm = createAnalysisLLM();
 
-  const mcptools = new MultiServerMCPClient({
-    mcpServers: {
-      'server-sequential-thinking': {
-        command: 'npx',
-        args: ['@modelcontextprotocol/server-sequential-thinking', '-y'],
-        transport: 'stdio',
+  let tools: unknown[] = [];
+  try {
+    const mcptools = new MultiServerMCPClient({
+      mcpServers: {
+        'server-sequential-thinking': {
+          command: 'npx',
+          args: ['-y', '@modelcontextprotocol/server-sequential-thinking'],
+          transport: 'stdio',
+        },
       },
-    },
-  });
+    });
 
-  const tools = await mcptools.getTools();
+    // 设置超时
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('MCP 服务器连接超时')), 10000);
+    });
+
+    tools = await Promise.race([
+      mcptools.getTools(),
+      timeoutPromise
+    ]) as unknown[];
+  } catch (error) {
+    console.error('分析 Agent MCP 工具初始化失败:', error);
+    tools = [];
+  }
 
   const analysisPrompt = `你是一个专业的信息分析师。你的任务是：
 
@@ -279,22 +359,36 @@ export async function createAnalysisAgent() {
 export async function createContentGenerationAgent() {
   const llm = createGenerationLLM();
 
-  const mcptools = new MultiServerMCPClient({
-    mcpServers: {
-      'server-sequential-thinking': {
-        command: 'npx',
-        args: ['@modelcontextprotocol/server-sequential-thinking', '-y'],
-        transport: 'stdio',
+  let tools: unknown[] = [];
+  try {
+    const mcptools = new MultiServerMCPClient({
+      mcpServers: {
+        'server-sequential-thinking': {
+          command: 'npx',
+          args: ['-y', '@modelcontextprotocol/server-sequential-thinking'],
+          transport: 'stdio',
+        },
+        filesystem: {
+          command: 'npx',
+          args: ['-y', '@modelcontextprotocol/server-filesystem', process.cwd()],
+          transport: 'stdio',
+        },
       },
-      filesystem: {
-        command: 'npx',
-        args: ['-y', '@modelcontextprotocol/server-filesystem', process.cwd()],
-        transport: 'stdio',
-      },
-    },
-  });
+    });
 
-  const tools = await mcptools.getTools();
+    // 设置超时
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('MCP 服务器连接超时')), 10000);
+    });
+
+    tools = await Promise.race([
+      mcptools.getTools(),
+      timeoutPromise
+    ]) as unknown[];
+  } catch (error) {
+    console.error('内容生成 Agent MCP 工具初始化失败:', error);
+    tools = [];
+  }
 
   const generationPrompt = `你是一个专业的内容创作专家。你的任务是：
 

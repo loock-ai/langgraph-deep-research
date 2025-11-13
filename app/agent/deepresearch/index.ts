@@ -160,6 +160,7 @@ export async function* streamDeepResearch(
       tools: allTools,
     },
     streamMode: 'updates',
+    recursionLimit: 200, // 增加递归限制到200
   };
 
   // 流式执行

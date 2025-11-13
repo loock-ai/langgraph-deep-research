@@ -41,84 +41,109 @@ export async function researchSectionNode(
   const llm = createAnalysisLLM();
 
   // 从运行时配置获取工具，如果没有则使用默认初始化
-  const allTools = config?.configurable?.tools;
+  let allTools = config?.configurable?.tools;
 
-  const researchPrompt = `你是一个专业的研究专家，能够完成完整的章节研究工作。你的能力包括：
+  // 如果没有工具或工具格式不正确，初始化默认工具
+  if (!allTools || !Array.isArray(allTools) || allTools.length === 0) {
+    console.log('从运行时配置获取工具失败，使用默认初始化');
+    try {
+      const { allTools: defaultTools } = await initializeTools();
+      allTools = defaultTools;
+    } catch (error) {
+      console.error('工具初始化失败，继续使用 LLM（无工具）:', error);
+      allTools = [];
+    }
+  }
 
-**信息搜索能力**：
-- 制定有效的搜索策略
-- 执行多轮搜索获取全面信息
-- 筛选和评估信息质量
-- 识别权威来源和可靠数据
+  const researchPrompt = `你是一个专业的研究专家。请按照以下指示完成章节研究：
 
-**深度分析能力**：
-- 使用sequential-thinking工具进行深度思考
-- 提取关键信息和核心观点
-- 发现内在联系和模式
-- 评估信息的可靠性和时效性
+重要说明：
+- 这是一个单一任务，请一次性完成，不要分步骤或循环
+- 直接使用可用的工具完成搜索和内容生成
+- 生成完整的章节内容作为最终结果
 
-**内容创作能力**：
-- 生成结构化的高质量内容
-- 使用适当的Markdown格式
-- 包含具体数据和引用来源
-- 确保逻辑清晰、论证充分
+研究任务：
+请完成对指定主题的全面研究，包括：
+1. 搜索相关信息和数据
+2. 分析和整理内容
+3. 生成结构化的章节内容
 
-工作流程：
-1. 首先使用搜索工具获取相关信息
-2. 然后使用sequential-thinking工具进行深度分析
-3. 最后基于分析结果生成完整的章节内容
+输出要求：
+- 使用 Markdown 格式
+- 包含清晰的标题结构
+- 提供具体的数据和事实
+- 确保内容逻辑连贯、论证充分
+- 每个章节应该在合理范围内完整（避免过长或过短）
 
-请确保每个步骤都充分完成，生成的内容具有学术性和专业性。`;
+请直接提供最终的研究成果，不需要额外解释。`;
 
-  const researchAgent = createReactAgent({
-    llm,
-    tools: allTools,
-    prompt: researchPrompt,
-  });
-
-  const researchInput = {
-    messages: [
-      {
-        role: 'user',
-        content: `请完成"${section.title}"章节的完整研究，包括信息搜索、深度分析和内容生成：
+  // 如果没有可用工具，使用简化的 LLM 调用而不是 React Agent
+  let result;
+  if (!allTools || allTools.length === 0) {
+    console.log('没有可用工具，使用简化的 LLM 调用');
+    const simplifiedPrompt = `请为以下主题生成一个研究章节：
 
 章节标题：${section.title}
 章节描述：${section.description}
-章节优先级：${section.priority}
 
-请按以下步骤完成研究：
+请基于你的知识生成一个结构化的研究章节，使用 Markdown 格式。包含：
+- 适当的标题和子标题
+- 准确的信息和分析
+- 专业的表达和结构
 
-1. **信息搜索阶段**：
-   - 使用多个搜索查询获取相关信息
-   - 搜索权威来源、学术资料、官方文档
-   - 重点关注：核心概念、发展历史、技术细节、应用案例
+章节内容：`;
 
-2. **深度分析阶段**：
-   - 使用sequential-thinking工具进行深度思考
-   - 提取关键信息和核心观点
-   - 识别重要数据、事实和趋势
-   - 评估信息可靠性和相关性
+    result = {
+      messages: [
+        {
+          role: 'assistant' as const,
+          content: await llm.invoke(simplifiedPrompt),
+        },
+      ],
+    };
+  } else {
+    const researchAgent = createReactAgent({
+      llm,
+      tools: allTools,
+      prompt: researchPrompt,
+    });
 
-3. **内容生成阶段**：
-   - 基于分析结果生成高质量章节内容
-   - 使用清晰的Markdown格式和标题层级
-   - 包含具体数据、事实和引用来源
-   - 确保逻辑连贯、论证充分
+    const researchInput = {
+      messages: [
+        {
+          role: 'user',
+          content: `请为以下主题生成一个完整的研究章节：
 
-请直接返回最终的章节内容（Markdown格式），包含完整的研究成果。`,
-      },
-    ],
-  };
+**章节标题**：${section.title}
+**章节描述**：${section.description}
+**章节优先级**：${section.priority}
 
-  try {
-    const config = {
-      configurable: {
-        thread_id: `section-research-${sessionId}-${nextSectionIndex}`,
-      },
+要求：
+1. 首先搜索相关信息，获取最新和准确的数据
+2. 分析信息并生成结构化的内容
+3. 使用Markdown格式，包含适当的标题和子标题
+4. 确保内容专业、准确、有价值
+5. 长度适中（通常500-1500字）
+
+请直接返回完整的章节内容（Markdown格式）。`,
+        },
+      ],
     };
 
-    const result = await researchAgent.invoke(researchInput, config);
+    // 确保传递正确的配置和工具
+    const agentConfig = {
+      configurable: {
+        thread_id: `section-research-${sessionId}-${nextSectionIndex}`,
+        tools: allTools, // 确保工具可用
+      },
+      recursionLimit: 20, // 为 Agent 设置递归限制
+    };
 
+    result = await researchAgent.invoke(researchInput, agentConfig);
+  }
+
+  // 统一处理结果
+  try {
     // 提取生成的内容
     const lastMessage = result.messages[result.messages.length - 1];
     const sectionContent = messageContentToString(lastMessage.content);
